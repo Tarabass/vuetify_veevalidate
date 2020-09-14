@@ -1,6 +1,13 @@
 <template>
   <ValidationObserver ref="observer" v-slot="{ /* validate, reset */ }">
-    <form>
+    <form style="width: 300px; margin: 50px auto 0">
+      <ValidationProvider v-slot="{ errors }" name="Terminal" rules="min:3|unique" mode="aggressive" :debounce="300">
+        <v-text-field
+          v-model="terminal"
+          :error-messages="errors"
+          label="Terminal"
+        ></v-text-field>
+      </ValidationProvider>
       <ValidationProvider v-slot="{ errors }" name="Name" rules="required|max:10">
         <v-text-field
           v-model="name"
@@ -46,7 +53,7 @@
 </template>
 
 <script>
-import { required, email, max } from 'vee-validate/dist/rules'
+import { required, email, max, min } from 'vee-validate/dist/rules'
 import { extend, ValidationObserver, ValidationProvider, setInteractionMode } from 'vee-validate'
 
 setInteractionMode('eager')
@@ -54,6 +61,19 @@ setInteractionMode('eager')
 extend('required', {
   ...required,
   message: '{_field_} can not be empty'
+})
+
+extend('min', {
+  ...min,
+  message: '{_field_} must be greater than {length} characters'
+})
+
+extend('unique', {
+  validate (value) {
+    const terminals = ['lassen', 'kantbank', 'ponsen']
+    return terminals.indexOf(value) < 0
+  },
+  message: 'The {_field_} field must be unique'
 })
 
 extend('max', {
@@ -72,6 +92,7 @@ export default {
     ValidationObserver
   },
   data: () => ({
+    terminal: '',
     name: '',
     email: '',
     select: null,
@@ -89,6 +110,7 @@ export default {
       this.$refs.observer.validate()
     },
     clear () {
+      this.terminal = ''
       this.name = ''
       this.email = ''
       this.select = null
