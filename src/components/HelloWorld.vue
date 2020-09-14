@@ -1,7 +1,7 @@
 <template>
   <ValidationObserver ref="observer" v-slot="{ /* validate, reset */ }">
     <form style="width: 300px; margin: 50px auto 0">
-      <ValidationProvider v-slot="{ errors }" name="Terminal" rules="min:3|unique" mode="aggressive" :debounce="300">
+      <ValidationProvider v-slot="{ errors }" name="Terminal" rules="min:3|unique" mode="aggressive" :debounce="500">
         <v-text-field
           v-model="terminal"
           :error-messages="errors"
@@ -69,9 +69,13 @@ extend('min', {
 })
 
 extend('unique', {
-  validate (value) {
-    const terminals = ['lassen', 'kantbank', 'ponsen']
-    return terminals.indexOf(value) < 0
+  async validate (value) {
+    if (value === '') return true
+
+    const response = await fetch('./api/terminals.json', {})
+    const data = await response.json()
+
+    return Boolean(data.terminals.indexOf(value) < 0)
   },
   message: 'The {_field_} field must be unique'
 })
