@@ -1,7 +1,7 @@
 <template>
   <ValidationObserver ref="observer" v-slot="{ /* validate, reset */dirty, handleSubmit }">
     <v-form @submit.prevent="handleSubmit(submit)" style="width: 300px; margin: 50px auto 0">
-      <ValidationProvider v-slot="{ errors }" name="Terminal" rules="required|min:3|unique" mode="aggressive" :debounce="500">
+      <ValidationProvider v-slot="{ errors }" name="Terminal" rules="required|min:3|unique" mode="aggressive" :debounce="1000">
         <v-text-field
           v-model="terminal"
           :error-messages="errors"
