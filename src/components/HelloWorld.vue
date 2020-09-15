@@ -1,7 +1,7 @@
 <template>
-  <ValidationObserver ref="observer" v-slot="{ /* validate, reset */ }">
-    <form style="width: 300px; margin: 50px auto 0">
-      <ValidationProvider v-slot="{ errors }" name="Terminal" rules="min:3|unique" mode="aggressive" :debounce="500">
+  <ValidationObserver ref="observer" v-slot="{ /* validate, reset */dirty, handleSubmit }">
+    <v-form @submit.prevent="handleSubmit(submit)" style="width: 300px; margin: 50px auto 0">
+      <ValidationProvider v-slot="{ errors }" name="Terminal" rules="required|min:3|unique" mode="aggressive" :debounce="500">
         <v-text-field
           v-model="terminal"
           :error-messages="errors"
@@ -45,52 +45,20 @@
           required
         ></v-checkbox>
       </ValidationProvider>
-
-      <v-btn class="mr-4" @click="submit">submit</v-btn>
-      <v-btn @click="clear">clear</v-btn>
-    </form>
+      <v-btn type="submit" class="mr-4">submit</v-btn>
+      <v-btn @click="clear" :disabled="!dirty">clear</v-btn>
+    </v-form>
   </ValidationObserver>
 </template>
 
 <script>
-import { required, email, max, min } from 'vee-validate/dist/rules'
-import { extend, ValidationObserver, ValidationProvider, setInteractionMode } from 'vee-validate'
-
-setInteractionMode('eager')
-
-extend('required', {
-  ...required,
-  message: '{_field_} can not be empty'
-})
-
-extend('min', {
-  ...min,
-  message: '{_field_} must be greater than {length} characters'
-})
-
-extend('unique', {
-  async validate (value) {
-    if (value === '') return true
-
-    const response = await fetch('./api/terminals.json', {})
-    const data = await response.json()
-
-    return Boolean(data.terminals.indexOf(value) < 0)
-  },
-  message: 'The {_field_} field must be unique'
-})
-
-extend('max', {
-  ...max,
-  message: '{_field_} may not be greater than {length} characters'
-})
-
-extend('email', {
-  ...email,
-  message: 'Email must be valid'
-})
+import { ValidationObserver, ValidationProvider } from 'vee-validate'
+import FormValidationMixin from '@/mixins/FormValidationMixin.js'
 
 export default {
+  mixins: [
+    FormValidationMixin
+  ],
   components: {
     ValidationProvider,
     ValidationObserver
@@ -110,9 +78,10 @@ export default {
   }),
 
   methods: {
-    submit () {
-      this.$refs.observer.validate()
-    },
+    // submit () {
+    //   this.$refs.observer.validate()
+    //   console.log('submit from form')
+    // },
     clear () {
       this.terminal = ''
       this.name = ''
